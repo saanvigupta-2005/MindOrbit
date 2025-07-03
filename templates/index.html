@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MindOrbit — Elara</title>
+
+  <!-- Fonts & CSS -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="container">
+    <div class="chat-card">
+      
+      <!-- Header with Logo -->
+      <header>
+        <div class="logo">
+          <img src="{{ url_for('static', filename='images/mindorbit.png') }}" alt="MindOrbit Logo">
+          <span>MindOrbit</span>
+        </div>
+      </header>
+
+      <!-- Intro -->
+      <div class="intro">
+        ✨ Hello, I’m <strong>Elara</strong>—your cosmic guide through knowledge and conversation.
+      </div>
+
+      <!-- Chat messages -->
+      <div id="chatBox" class="chat-box"></div>
+
+      <!-- Input -->
+      <div class="input-area">
+        <input id="userInput" type="text" placeholder="Ask me anything…" autocomplete="off" />
+        <button id="sendBtn">➤</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chat logic -->
+  <script>
+    const chatBox   = document.getElementById("chatBox");
+    const userInput = document.getElementById("userInput");
+    const sendBtn   = document.getElementById("sendBtn");
+
+    sendBtn.onclick = sendMessage;
+    userInput.addEventListener("keydown", e => {
+      if (e.key === "Enter") sendMessage();
+    });
+
+    function appendMsg(content, role = "user") {
+      const row = document.createElement("div");
+      row.className = `message ${role}`;
+
+      if (role === "bot") {
+        const icon = document.createElement("span");
+        icon.className = "bot-icon";
+        icon.textContent = "🪐";
+        row.appendChild(icon);
+      }
+
+      const bubble = document.createElement("div");
+      bubble.className = "bubble";
+      bubble.innerHTML = content;
+      row.appendChild(bubble);
+
+      if (role === "bot") {
+        const actions = document.createElement("div");
+        actions.className = "bubble-actions";
+
+        const copyBtn = document.createElement("button");
+        copyBtn.className = "action-btn";
+        copyBtn.innerHTML = `
+          <img src="{{ url_for('static', filename='images/copy-icon.png') }}" alt="Copy Icon" class="img-icon">
+          <span>Copy</span>
+        `;
+        copyBtn.onclick = () => {
+          navigator.clipboard.writeText(bubble.textContent);
+          copyBtn.querySelector("span").textContent = "Copied!";
+          setTimeout(() => (copyBtn.querySelector("span").textContent = "Copy"), 1500);
+        };
+
+        const downloadBtn = document.createElement("button");
+        downloadBtn.className = "action-btn";
+        downloadBtn.innerHTML = `
+          <svg xmlns="http://www.w3.org/2000/svg" class="icon" height="16" viewBox="0 0 24 24" width="16" fill="currentColor">
+            <path d="M5 20h14v-2H5v2zM19 9h-4V3H9v6H5l7 7 7-7z"/>
+          </svg>
+          <span>Download</span>
+        `;
+        downloadBtn.onclick = () => {
+          const blob = new Blob([bubble.textContent], { type: "text/plain" });
+          const link = document.createElement("a");
+          link.href = URL.createObjectURL(blob);
+          link.download = "elara-reply.txt";
+          link.click();
+        };
+
+        actions.appendChild(copyBtn);
+        actions.appendChild(downloadBtn);
+        row.appendChild(actions);
+      }
+
+      chatBox.appendChild(row);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    async function sendMessage() {
+      const text = userInput.value.trim();
+      if (!text) return;
+      appendMsg(text, "user");
+      userInput.value = "";
+
+      const thinking = document.createElement("div");
+      thinking.className = "message bot";
+      thinking.innerHTML = `<span class="bot-icon">🪐</span><div class="bubble">…</div>`;
+      chatBox.appendChild(thinking);
+      chatBox.scrollTop = chatBox.scrollHeight;
+
+      try {
+        const res  = await fetch("/chat", {
+          method : "POST",
+          headers: { "Content-Type": "application/json" },
+          body   : JSON.stringify({ message: text })
+        });
+        const data = await res.json();
+        chatBox.removeChild(thinking);
+        appendMsg(data.reply || "Hmm, I’m not sure 🤔", "bot");
+      } catch (err) {
+        chatBox.removeChild(thinking);
+        appendMsg("⚠️ Error contacting Elara.", "bot");
+      }
+    }
+  </script>
+</body>
+</html>
