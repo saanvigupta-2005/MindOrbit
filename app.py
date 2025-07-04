@@ -12,7 +12,7 @@ app = Flask(__name__)
 # Set up Gemini
 genai.configure(api_key=os.getenv("gemini"))
 
-model = genai.GenerativeModel("models/chat-bison-001")
+model = genai.GenerativeModel("models/gemini-1.5-flash")
 
 @app.route("/")
 def index():
