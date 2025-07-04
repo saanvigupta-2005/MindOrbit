@@ -5,15 +5,10 @@ import google.generativeai as genai
 app = Flask(__name__)
 
 # Configure Gemini API key
-genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
+genai.configure(api_key=os.environ.get("gemini"))
 
-# Initialize the Gemini model
+# Load the Gemini model
 model = genai.GenerativeModel("gemini-pro")
-
-# Start a persistent chat session with a system prompt
-chat_session = model.start_chat(history=[
-    {"role": "user", "parts": ["You are Elara, a helpful and intelligent AI assistant. Answer clearly, kindly, and accurately."]}
-])
 
 @app.route("/")
 def home():
@@ -27,10 +22,16 @@ def chat():
         return jsonify({"response": "Please enter a message."}), 400
 
     try:
-        response = chat_session.send_message(user_input)
+        # Use a structured prompt to guide Gemini
+        prompt = (
+            "You are Elara, a helpful, intelligent, and friendly AI assistant. "
+            "Answer the user's question clearly and accurately.\n\n"
+            f"User: {user_input}\nElara:"
+        )
+
+        response = model.generate_content(prompt)
         reply = response.text.strip()
 
-        # Fallback if Gemini returns a vague or empty response
         if not reply or "I'm not sure" in reply:
             reply = "I'm still learning! Could you try rephrasing that?"
 
