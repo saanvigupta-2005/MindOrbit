@@ -27,7 +27,7 @@ def chat():
         return jsonify({"reply": "Please enter a message."})
 
     try:
-        response = model.generate_content(user_input)
+        response = model.generate_content([user_input])
         reply = response.text.strip()
         return jsonify({"reply": reply})
     except Exception as e:
