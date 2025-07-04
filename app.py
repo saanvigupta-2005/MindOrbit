@@ -3,8 +3,13 @@ from flask import Flask, request, jsonify, render_template
 import google.generativeai as genai
 
 app = Flask(__name__)
-genai.configure(api_key=os.environ.get("gemini"))
-model = genai.GenerativeModel("gemini-pro")
+
+# Explicitly configure Gemini with API key
+API_KEY = os.environ.get("GEMINI_API_KEY")
+genai.configure(api_key=API_KEY)
+
+# Create the model with the API key
+model = genai.GenerativeModel(model_name="gemini-pro")
 
 @app.route("/")
 def home():
