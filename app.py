@@ -2,8 +2,9 @@ from flask import Flask, request, jsonify, render_template
 import google.generativeai as genai
 import os
 from dotenv import load_dotenv
+import markdown  # ✅ Import markdown converter
 
-# Load environment variables from .env (for local testing)
+# Load environment variables
 load_dotenv()
 
 # Initialize Flask app
@@ -17,7 +18,7 @@ model = genai.GenerativeModel("models/gemini-1.5-flash")
 
 @app.route("/")
 def index():
-    return render_template("index.html")  # Ensure index.html is in the 'templates' folder
+    return render_template("index.html")
 
 @app.route("/chat", methods=["POST"])
 def chat():
@@ -28,23 +29,20 @@ def chat():
         return jsonify({"reply": "Please enter a message."})
 
     try:
-        # Prompt Elara to respond in a structured, readable format
+        # Prompt Elara to respond in structured Markdown
         prompt = (
             "You are Elara, a helpful and intelligent AI assistant. "
-            "When answering questions, respond in a clear, structured format using bullet points or numbered lists where appropriate. "
-            "Use line breaks and formatting to make your response easy to read.\n\n"
+            "Respond in clear, structured Markdown format using bullet points, bold text, and line breaks where appropriate.\n\n"
             f"User: {user_input}\nElara:"
         )
 
-        # Gemini expects a list of parts
         response = model.generate_content([prompt])
-        reply = response.text.strip()
+        raw_reply = response.text.strip()
 
-        # Fallback if Gemini returns a vague or empty response
-        if not reply or "I'm not sure" in reply:
-            reply = "I'm still learning! Could you try rephrasing that?"
+        # ✅ Convert Markdown to HTML
+        html_reply = markdown.markdown(raw_reply)
 
-        return jsonify({"reply": reply})
+        return jsonify({"reply": html_reply})
 
     except Exception as e:
         print("Error:", e)
