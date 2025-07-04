@@ -94,7 +94,7 @@ https://mindorbit.onrender.com/
 ### 🖼 First Screen UI  
 Below is a screenshot of the chatbot interface when the page first loads:
 
-![MindOrbit Elara UI Screenshot](https://your-image-host.com/mindorbit-screenshot.png)  
+![MindOrbit Elara UI Screenshot](UI_CHATBOT.png)  
 *(Replace with your actual screenshot URL or embed the file in your repo)*
 
 > Shows: Logo branding, assistant introduction, styled message box, and input field.
