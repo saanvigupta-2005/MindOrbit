@@ -1,38 +1,39 @@
-import os
 from flask import Flask, request, jsonify, render_template
 import google.generativeai as genai
+import os
+from dotenv import load_dotenv
 
+# Load environment variables
+load_dotenv()
+
+# Initialize app
 app = Flask(__name__)
 
-# Configure Gemini API key
-genai.configure(api_key="AIzaSyDPKLA9Q9M2sI4ADUcibruAEDXRHEfpbns")
+# Set up Gemini
+genai.configure(api_key=os.getenv("gemini"))
 
-# Load the Gemini model
 model = genai.GenerativeModel("gemini-pro")
 
 @app.route("/")
-def home():
+def index():
     return render_template("index.html")
 
 @app.route("/chat", methods=["POST"])
 def chat():
-    user_input = request.json.get("message")
+    data = request.get_json()
+    user_input = data.get("message", "")
 
-    if not user_input:
-        return jsonify({"response": "Please enter a message."}), 400
+    if not user_input.strip():
+        return jsonify({"reply": "Please enter a message."})
 
     try:
-        # Gemini expects a list of parts, not just a string
-        response = model.generate_content([user_input])
+        response = model.generate_content(user_input)
         reply = response.text.strip()
-
-        if not reply or "I'm not sure" in reply:
-            reply = "I'm still learning! Could you try rephrasing that?"
-
+        return jsonify({"reply": reply})
     except Exception as e:
-        reply = f"Oops! Something went wrong: {str(e)}"
-
-    return jsonify({"response": reply})
+        print("Error:", e)
+        return jsonify({"reply": "⚠️ Error processing request."})
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=10000)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(debug=True, host="0.0.0.0", port=port)
