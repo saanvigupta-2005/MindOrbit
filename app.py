@@ -12,7 +12,7 @@ model = genai.GenerativeModel("gemini-pro")
 
 @app.route("/")
 def home():
-    return render_template("index.html")  # Make sure index.html is in the 'templates' folder
+    return render_template("index.html")
 
 @app.route("/chat", methods=["POST"])
 def chat():
@@ -22,14 +22,8 @@ def chat():
         return jsonify({"response": "Please enter a message."}), 400
 
     try:
-        # Use a structured prompt to guide Gemini
-        prompt = (
-            "You are Elara, a helpful, intelligent, and friendly AI assistant. "
-            "Answer the user's question clearly and accurately.\n\n"
-            f"User: {user_input}\nElara:"
-        )
-
-        response = model.generate_content(prompt)
+        # Gemini expects a list of parts, not just a string
+        response = model.generate_content([user_input])
         reply = response.text.strip()
 
         if not reply or "I'm not sure" in reply:
