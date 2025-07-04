@@ -88,7 +88,8 @@ MindOrbit is versatile and applicable to a wide range of conversational AI appli
 
 ## 📸 Live Preview & Screenshots
 
-### 🔗 (Live Project Link(https://mindorbit.onrender.com/))  
+### 🔗 Live Project Link
+(https://mindorbit.onrender.com/)
 
 ### 🖼 First Screen UI  
 Below is a screenshot of the chatbot interface when the page first loads:
